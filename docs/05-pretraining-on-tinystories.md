@@ -50,6 +50,17 @@ python scripts/train_pretrain.py \
   --train-config configs/train/tinystories_quality.json
 ```
 
+## Quality continuation run
+
+Use this when `cap-26m-fast-dev` is your strongest checkpoint and you want a safer long run than restarting from scratch:
+
+```bash
+python scripts/train_pretrain.py \
+  --model-config configs/model/cap_26m.json \
+  --train-config configs/train/tinystories_quality_continue.json \
+  --init-checkpoint artifacts/checkpoints/cap-26m-fast-dev
+```
+
 ## Model shape
 
 The default model target is approximately 26M parameters with:
@@ -69,3 +80,4 @@ The default model target is approximately 26M parameters with:
 - Keep sequence length at 256 while validating the end-to-end path.
 - The training script prints a run summary before it begins token processing so you can catch wrong paths or budgets early.
 - The `fast-dev` config is for quick debugging; the `quality` config is for a longer run you should launch in your own terminal.
+- If the scratch `quality` run degrades model quality, prefer `tinystories_quality_continue.json` with `--init-checkpoint artifacts/checkpoints/cap-26m-fast-dev`.

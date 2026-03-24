@@ -63,5 +63,6 @@ If you want better quality:
 
 - train longer than the sanity token budget
 - use `configs/train/tinystories_quality.json` or another longer TinyStories config after sanity succeeds
+- if the scratch quality run degrades, continue from `cap-26m-fast-dev` with `configs/train/tinystories_quality_continue.json`
 - compare eval loss and perplexity across checkpoints instead of relying only on one prompt
 - add a second-stage adaptation pass only after the base TinyStories model is stable
