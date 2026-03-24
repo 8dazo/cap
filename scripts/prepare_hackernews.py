@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-import json
-from pathlib import Path
 
+from cap.config import ConfigError, load_json_config, print_run_summary, validate_train_config
 from cap.data import iter_hackernews_text
 
 
@@ -15,8 +14,23 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    cfg = json.loads(Path(args.config).read_text())
+    try:
+        cfg = validate_train_config(load_json_config(args.config))
+    except ConfigError as exc:
+        raise SystemExit(str(exc)) from exc
     dataset_cfg = cfg["dataset"]
+    print_run_summary(
+        "Hacker News preview",
+        [
+            ("dataset", dataset_cfg["name"]),
+            ("split", dataset_cfg["split"]),
+            ("year_start", dataset_cfg.get("year_start")),
+            ("year_end", dataset_cfg.get("year_end")),
+            ("include_comments", dataset_cfg.get("include_comments", True)),
+            ("include_stories", dataset_cfg.get("include_stories", True)),
+            ("preview", args.preview),
+        ],
+    )
 
     for index, text in enumerate(
         iter_hackernews_text(

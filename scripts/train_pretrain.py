@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import json
 import math
 import time
 from contextlib import nullcontext
@@ -10,6 +9,7 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from cap.config import ConfigError, load_json_config, print_run_summary, validate_model_config, validate_train_config
 from cap.data import PackedHackerNewsDataset, PackedTinyStoriesDataset
 from cap.modeling import build_llama_model
 
@@ -93,14 +93,32 @@ def evaluate(model, loader, device: str, amp_context, max_batches: int):
 
 def main() -> None:
     args = parse_args()
-    model_config = json.loads(Path(args.model_config).read_text())
-    train_config = json.loads(Path(args.train_config).read_text())
+    try:
+        model_config = validate_model_config(load_json_config(args.model_config))
+        train_config = validate_train_config(load_json_config(args.train_config))
+    except ConfigError as exc:
+        raise SystemExit(str(exc)) from exc
     output_dir = Path(train_config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(train_config["tokenizer_dir"])
     device = pick_device()
-    print(f"device: {device}")
+    print_run_summary(
+        "Training run",
+        [
+            ("model_name", model_config["name"]),
+            ("dataset", train_config["dataset"]["name"]),
+            ("split", train_config["dataset"]["split"]),
+            ("output_dir", output_dir),
+            ("tokenizer_dir", train_config["tokenizer_dir"]),
+            ("device", device),
+            ("sequence_length", train_config["sequence_length"]),
+            ("micro_batch_size", train_config["micro_batch_size"]),
+            ("gradient_accumulation_steps", train_config["gradient_accumulation_steps"]),
+            ("total_tokens", train_config["total_tokens"]),
+            ("init_checkpoint", args.init_checkpoint or "<none>"),
+        ],
+    )
 
     if device in {"mps", "cuda"}:
         amp_context = torch.autocast(device_type=device, dtype=torch.float16)
@@ -139,8 +157,16 @@ def main() -> None:
         * train_config["gradient_accumulation_steps"]
     )
     total_steps = math.ceil(train_config["total_tokens"] / tokens_per_step)
-    print(f"tokens_per_step: {tokens_per_step}")
-    print(f"total_steps: {total_steps}")
+    print_run_summary(
+        "Training schedule",
+        [
+            ("tokens_per_step", tokens_per_step),
+            ("total_steps", total_steps),
+            ("learning_rate", train_config["learning_rate"]),
+            ("min_learning_rate", train_config["min_learning_rate"]),
+            ("save_every_steps", train_config["save_every_steps"]),
+        ],
+    )
 
     train_loader = build_loader(tokenizer, train_config, split=train_config["dataset"]["split"])
     eval_loader = build_loader(tokenizer, train_config, split=train_config["dataset"]["split"])

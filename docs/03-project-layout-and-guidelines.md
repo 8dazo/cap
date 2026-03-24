@@ -17,6 +17,7 @@ This repo is intentionally small and tutorial-shaped. The code and docs should s
 - Keep all tutorial commands runnable from repo root.
 - Prefer streamed datasets over full downloads.
 - Start with sanity configs before full configs.
+- Fail fast on invalid config values before starting long runs.
 - Keep tokenizer, checkpoints, and exports under `artifacts/`.
 - Avoid hidden magic in docs. Every command should point to a real file in this repo.
 - Do not create a `.ai/` folder.

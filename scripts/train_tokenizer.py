@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import json
 from pathlib import Path
 
 from datasets import load_dataset
 from tokenizers import Tokenizer, decoders, models, pre_tokenizers, trainers
 from transformers import PreTrainedTokenizerFast
+
+from cap.config import ConfigError, load_json_config, print_run_summary, validate_model_config
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,15 +21,25 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    config = json.loads(Path(args.config).read_text())
+    try:
+        config = validate_model_config(load_json_config(args.config))
+    except ConfigError as exc:
+        raise SystemExit(str(exc)) from exc
+
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    special_tokens = [
-        config["unk_token"],
-        config["bos_token"],
-        config["eos_token"],
-    ]
+    special_tokens = [config["unk_token"], config["bos_token"], config["eos_token"]]
+    print_run_summary(
+        "Tokenizer run",
+        [
+            ("model_name", config["name"]),
+            ("dataset", "roneneldan/TinyStories"),
+            ("output_dir", output_dir),
+            ("max_stories", args.max_stories),
+            ("vocab_size", config["vocab_size"]),
+        ],
+    )
 
     dataset = load_dataset("roneneldan/TinyStories", split="train", streaming=True)
     dataset = dataset.shuffle(buffer_size=args.shuffle_buffer, seed=args.seed)

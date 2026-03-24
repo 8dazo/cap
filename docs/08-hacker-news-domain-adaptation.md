@@ -30,6 +30,8 @@ python scripts/prepare_hackernews.py \
   --preview 10
 ```
 
+The preview command validates the train config first and prints the resolved dataset settings so you can confirm the year range and filter mode before adaptation.
+
 ## Run a small adaptation job
 
 ```bash

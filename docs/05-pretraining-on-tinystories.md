@@ -15,6 +15,7 @@ python scripts/train_pretrain.py \
 The sanity config uses a reduced token budget so you can confirm:
 
 - device selection works
+- config validation passes before the job starts
 - loss decreases
 - checkpoints save correctly
 - evaluation can read the saved output
@@ -44,3 +45,4 @@ The default model target is approximately 26M parameters with:
 - Float16 autocast is the practical default on Mac.
 - Gradient checkpointing is optional and enabled in the fuller config.
 - Keep sequence length at 256 while validating the end-to-end path.
+- The training script prints a run summary before it begins token processing so you can catch wrong paths or budgets early.
