@@ -1,0 +1,28 @@
+{
+  "output_dir": "artifacts/checkpoints/cap-26m-quality-continue",
+  "tokenizer_dir": "artifacts/tokenizers/cap-bytebpe",
+  "dataset": {
+    "name": "roneneldan/TinyStories",
+    "subset": null,
+    "split": "train",
+    "streaming": true
+  },
+  "sequence_length": 256,
+  "micro_batch_size": 8,
+  "gradient_accumulation_steps": 16,
+  "total_tokens": 200000000,
+  "warmup_steps": 100,
+  "learning_rate": 0.00005,
+  "min_learning_rate": 0.00001,
+  "weight_decay": 0.1,
+  "adam_beta1": 0.9,
+  "adam_beta2": 0.95,
+  "adam_epsilon": 1e-08,
+  "grad_clip": 1.0,
+  "eval_every_steps": 250,
+  "eval_batches": 20,
+  "save_every_steps": 250,
+  "max_train_examples": 0,
+  "seed": 42,
+  "use_gradient_checkpointing": true
+}
