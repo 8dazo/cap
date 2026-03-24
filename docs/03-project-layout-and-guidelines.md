@@ -38,12 +38,14 @@ This repo is intentionally small and tutorial-shaped. The code and docs should s
 - `python scripts/eval_sample.py --checkpoint ...`
 - `python scripts/prepare_hackernews.py --config configs/train/hackernews_adapt.json`
 - `python scripts/adapt_hackernews.py --model-config ... --train-config ... --checkpoint ...`
+- `bash scripts/export_gguf.sh <checkpoint-dir>`
 
 ## Working style
 
 - Make one small run succeed before scaling tokens or context.
 - Save frequent checkpoints during long local runs.
 - Treat Hacker News as a deliberate optional branch, not the default base data.
+- Run long tokenizer builds, training jobs, and GGUF exports in your own terminal so you can watch logs directly.
 
 ## GitHub workflow
 

@@ -10,6 +10,19 @@ cmake -S artifacts/llama.cpp -B artifacts/llama.cpp/build
 cmake --build artifacts/llama.cpp/build --config Release
 ```
 
+This build can take a while, so run it in your own terminal rather than leaving it in a background assistant session.
+
+## One-command export helper
+
+```bash
+bash scripts/export_gguf.sh artifacts/checkpoints/cap-26m-sanity
+```
+
+This writes:
+
+- `artifacts/exports/cap-26m-sanity-f16.gguf`
+- `artifacts/exports/cap-26m-sanity-q4_0.gguf`
+
 ## Convert a checkpoint
 
 ```bash
