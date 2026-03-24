@@ -1,0 +1,23 @@
+[project]
+name = "cap"
+version = "0.1.0"
+description = "Mac-first tutorial scaffolding for training a tiny LLM from scratch."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "accelerate>=1.5.0",
+  "datasets>=3.4.1",
+  "evaluate>=0.4.3",
+  "numpy>=2.2.4",
+  "safetensors>=0.5.3",
+  "tokenizers>=0.21.1",
+  "torch>=2.6.0",
+  "transformers>=4.50.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

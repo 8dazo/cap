@@ -1,0 +1,12 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+
+artifacts/.hf/
+artifacts/checkpoints/
+artifacts/exports/
+artifacts/llama.cpp/
+artifacts/tokenizers/
+
+.pytest_cache/

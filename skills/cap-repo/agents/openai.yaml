@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cap Repo"
+  short_description: "Cap repo tutorial and delivery workflow"
+  default_prompt: "Use $cap-repo to update the Cap tutorial, scripts, configs, or GitHub delivery workflow in this repo."
+
+policy:
+  allow_implicit_invocation: true
