@@ -22,6 +22,7 @@ python scripts/train_tokenizer.py \
 - Trains a ByteLevel BPE tokenizer
 - Saves Hugging Face compatible tokenizer artifacts
 - Stores a small metadata file with the training settings
+- Validates the model config first and prints a short run summary before work begins
 
 ## Defaults worth keeping
 
