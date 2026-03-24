@@ -30,6 +30,26 @@ python scripts/train_pretrain.py \
   --train-config configs/train/tinystories_full.json
 ```
 
+## Fast-dev run
+
+Use this when you want a quick iteration cycle after changing code or configs:
+
+```bash
+python scripts/train_pretrain.py \
+  --model-config configs/model/cap_26m.json \
+  --train-config configs/train/tinystories_fast_dev.json
+```
+
+## Quality-oriented run
+
+Use this only in your own terminal, because it is a longer-running job:
+
+```bash
+python scripts/train_pretrain.py \
+  --model-config configs/model/cap_26m.json \
+  --train-config configs/train/tinystories_quality.json
+```
+
 ## Model shape
 
 The default model target is approximately 26M parameters with:
@@ -48,3 +68,4 @@ The default model target is approximately 26M parameters with:
 - Gradient checkpointing is optional and enabled in the fuller config.
 - Keep sequence length at 256 while validating the end-to-end path.
 - The training script prints a run summary before it begins token processing so you can catch wrong paths or budgets early.
+- The `fast-dev` config is for quick debugging; the `quality` config is for a longer run you should launch in your own terminal.

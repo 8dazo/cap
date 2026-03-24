@@ -53,6 +53,7 @@ This tutorial keeps the default evaluation lightweight so local iteration stays 
 If you want faster iteration:
 
 - use the sanity config before the full config
+- use `configs/train/tinystories_fast_dev.json` after code changes
 - keep `sequence_length=256`
 - reduce `eval_batches` during debugging
 - keep `HF_TOKEN` exported so dataset access is less rate-limited
@@ -61,6 +62,6 @@ If you want faster iteration:
 If you want better quality:
 
 - train longer than the sanity token budget
-- use the fuller TinyStories config after sanity succeeds
+- use `configs/train/tinystories_quality.json` or another longer TinyStories config after sanity succeeds
 - compare eval loss and perplexity across checkpoints instead of relying only on one prompt
 - add a second-stage adaptation pass only after the base TinyStories model is stable
