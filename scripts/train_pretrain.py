@@ -14,6 +14,11 @@ from cap.data import PackedHackerNewsDataset, PackedTinyStoriesDataset
 from cap.modeling import build_llama_model
 
 
+def log_stage(message: str) -> None:
+    timestamp = time.strftime("%H:%M:%S")
+    print(f"[{timestamp}] {message}", flush=True)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train the Cap tutorial model.")
     parser.add_argument("--model-config", required=True, help="Path to model config JSON.")
@@ -94,6 +99,7 @@ def evaluate(model, loader, device: str, amp_context, max_batches: int):
 def main() -> None:
     args = parse_args()
     try:
+        log_stage("Loading model and training configs")
         model_config = validate_model_config(load_json_config(args.model_config))
         train_config = validate_train_config(load_json_config(args.train_config))
     except ConfigError as exc:
@@ -101,6 +107,7 @@ def main() -> None:
     output_dir = Path(train_config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    log_stage("Loading tokenizer")
     tokenizer = AutoTokenizer.from_pretrained(train_config["tokenizer_dir"])
     device = pick_device()
     print_run_summary(
@@ -125,6 +132,7 @@ def main() -> None:
     else:
         amp_context = nullcontext()
 
+    log_stage("Building model")
     if args.init_checkpoint:
         model = AutoModelForCausalLM.from_pretrained(args.init_checkpoint).to(device)
     else:
@@ -132,6 +140,7 @@ def main() -> None:
     if train_config.get("use_gradient_checkpointing"):
         model.gradient_checkpointing_enable()
 
+    log_stage("Preparing optimizer")
     decay, no_decay = [], []
     for name, parameter in model.named_parameters():
         if not parameter.requires_grad:
@@ -168,17 +177,24 @@ def main() -> None:
         ],
     )
 
+    log_stage("Building training dataloader")
     train_loader = build_loader(tokenizer, train_config, split=train_config["dataset"]["split"])
+    log_stage("Building evaluation dataloader")
     eval_loader = build_loader(tokenizer, train_config, split=train_config["dataset"]["split"])
 
     optimizer.zero_grad(set_to_none=True)
     running_tokens = 0
     started_at = time.time()
+    first_step_started_at = None
 
     model.train()
+    log_stage("Starting training loop")
     for step, (x, y) in enumerate(train_loader, start=1):
         if step > total_steps:
             break
+        if step == 1:
+            first_step_started_at = time.time()
+            log_stage("Received first batch from dataset stream")
 
         lr = lr_schedule(step, total_steps, train_config)
         for param_group in optimizer.param_groups:
@@ -200,18 +216,22 @@ def main() -> None:
 
         running_tokens += x.numel()
 
-        if step % 50 == 0:
+        if step == 1 and first_step_started_at is not None:
+            log_stage(f"Completed first backward pass in {time.time() - first_step_started_at:.1f}s")
+
+        if step <= 10 or step % 50 == 0:
             elapsed = time.time() - started_at
             tok_per_sec = running_tokens / max(elapsed, 1e-9)
             print(
                 f"step={step}/{total_steps} lr={lr:.2e} "
                 f"loss={loss.item() * train_config['gradient_accumulation_steps']:.4f} "
-                f"tok_per_sec={tok_per_sec:.0f}"
+                f"tok_per_sec={tok_per_sec:.0f}",
+                flush=True,
             )
 
         if step % train_config["eval_every_steps"] == 0:
             eval_loss, eval_ppl = evaluate(model, eval_loader, device, amp_context, train_config["eval_batches"])
-            print(f"eval_step={step} eval_loss={eval_loss:.4f} eval_ppl={eval_ppl:.2f}")
+            print(f"eval_step={step} eval_loss={eval_loss:.4f} eval_ppl={eval_ppl:.2f}", flush=True)
 
         if step % train_config["save_every_steps"] == 0:
             checkpoint_dir = output_dir / f"checkpoint-step-{step}"
@@ -222,11 +242,11 @@ def main() -> None:
                 {"step": step, "optimizer": optimizer.state_dict()},
                 checkpoint_dir / "trainer_state.pt",
             )
-            print(f"saved_checkpoint: {checkpoint_dir}")
+            print(f"saved_checkpoint: {checkpoint_dir}", flush=True)
 
     model.save_pretrained(output_dir, safe_serialization=True)
     tokenizer.save_pretrained(output_dir)
-    print(f"saved_final_model: {output_dir}")
+    print(f"saved_final_model: {output_dir}", flush=True)
 
 
 if __name__ == "__main__":

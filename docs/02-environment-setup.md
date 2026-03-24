@@ -46,6 +46,12 @@ export HF_DATASETS_CACHE="$HF_HOME/datasets"
 mkdir -p "$HF_HUB_CACHE" "$HF_DATASETS_CACHE"
 ```
 
+If you have a Hugging Face access token, export it in your shell before long runs so dataset access is less rate-limited:
+
+```bash
+export HF_TOKEN="your_token_here"
+```
+
 ## MPS safety knobs
 
 Use CPU fallback for unsupported MPS ops:

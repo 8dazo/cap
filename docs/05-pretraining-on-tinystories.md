@@ -6,6 +6,7 @@ This is the main tutorial path. Get this working before touching Hacker News.
 
 ```bash
 source .venv/bin/activate
+export HF_TOKEN="your_token_here"
 export PYTORCH_ENABLE_MPS_FALLBACK=1
 python scripts/train_pretrain.py \
   --model-config configs/model/cap_26m.json \
@@ -16,6 +17,7 @@ The sanity config uses a reduced token budget so you can confirm:
 
 - device selection works
 - config validation passes before the job starts
+- startup stage logs show tokenizer loading, model build, dataloader setup, and the first batch
 - loss decreases
 - checkpoints save correctly
 - evaluation can read the saved output
